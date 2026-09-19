@@ -1,7 +1,21 @@
 import logging
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ChatJoinRequestHandler, ContextTypes
+
+# Simple dummy web server so Render's Free Tier stays active
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is alive!")
+
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    server.serve_forever()
 
 TOKEN = os.environ.get("BOT_TOKEN")
 
@@ -51,6 +65,9 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
         print(f"Error handling request: {e}")
 
 if name == '__main__':
+    # Start web server in background thread for Render health check
+    threading.Thread(target=run_dummy_server, daemon=True).start()
+
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(ChatJoinRequestHandler(auto_approve_and_welcome))
     print("Bot is starting...")
