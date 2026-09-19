@@ -1,24 +1,23 @@
-import logging
 import os
+import logging
 import threading
-import asyncio
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ChatJoinRequestHandler, ContextTypes
 
-# Simple HTTP health check server for Render Free Tier
-class HealthCheckHandler(BaseHTTPRequestHandler):
+# Health check server for Render
+class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"OK")
 
-def start_health_server():
+def run_web_server():
     port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
     server.serve_forever()
 
-TOKEN = os.environ.get("BOT_TOKEN")
+TOKEN = os.environ.get("BOT_TOKEN", "").strip()
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,19 +27,19 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
     chat = request.chat
 
     try:
-        # 1. Automatically approve join request
+        # 1. Approve join request
         await context.bot.approve_chat_join_request(
             chat_id=chat.id,
             user_id=user.id
         )
         print(f"Approved {user.first_name} in {chat.title}")
 
-        # 2. Formatted welcome message
+        # 2. Welcome message
         welcome_text = (
             "Welcome To The Jetqueen Silpa Aviator Channel 🔥\n\n"
             "Ready to earn with 1WIN Aviator? 💸\n"
             "Follow these 3 quick steps 👇\n\n"
-            "1️⃣ Create ID: [https://lkfg.pro/83ee896d](https://lkfg.pro/83ee896d)\n\n"
+            "1️⃣ Create ID: https://lkfg.pro/83ee896d\n\n"
             "2️⃣ Use Promo Code: **DS745**\n"
             "3️⃣ Deposit ₹500+ for India or 10 dollar for others to get prime + bot token\n\n"
             "✅ VIP Signals\n"
@@ -50,11 +49,9 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
             "📩 After deposit, send your ID — I’ll add you to VIP Group FREE 🔥"
         )
 
-        # 3. Direct registration button
         keyboard = [[InlineKeyboardButton("🚀 Create 1WIN ID Now", url="https://lkfg.pro/83ee896d")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        # 4. Send private message to user
         await context.bot.send_message(
             chat_id=user.id,
             text=welcome_text,
@@ -66,13 +63,13 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
         print(f"Error handling request: {e}")
 
 if name == '__main__':
-    # Start web server thread
-    health_thread = threading.Thread(target=start_health_server, daemon=True)
-    health_thread.start()
+    # Start background web server thread
+    threading.Thread(target=run_web_server, daemon=True).start()
 
-    # Build Telegram Bot
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(ChatJoinRequestHandler(auto_approve_and_welcome))
-    
-    print("Bot is starting...")
-    app.run_polling(stop_signals=None)
+    if not TOKEN:
+        print("ERROR: BOT_TOKEN is missing in Environment Variables!")
+    else:
+        app = ApplicationBuilder().token(TOKEN).build()
+        app.add_handler(ChatJoinRequestHandler(auto_approve_and_welcome))
+        print("Bot is starting...")
+        app.run_polling(stop_signals=None)
