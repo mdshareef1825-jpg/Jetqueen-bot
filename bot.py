@@ -129,7 +129,7 @@ async def handle_message_forwarding(update: Update, context: ContextTypes.DEFAUL
         except Exception as e:
             print(f"Error forwarding message: {e}")
 
-if name == '__main__':
+if __name__ == '__main__':
     threading.Thread(target=run_web_server, daemon=True).start()
 
     if not TOKEN:
