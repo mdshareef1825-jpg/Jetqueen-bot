@@ -1,4 +1,3 @@
-
 import os
 import logging
 import threading
@@ -111,8 +110,7 @@ async def handle_message_forwarding(update: Update, context: ContextTypes.DEFAUL
         try:
             forwarded = await context.bot.forward_message(
                 chat_id=ADMIN_USER_ID,
-
-from_chat_id=message.chat_id,
+                from_chat_id=message.chat_id,
                 message_id=message.message_id
             )
             
