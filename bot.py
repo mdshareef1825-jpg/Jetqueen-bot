@@ -1,20 +1,21 @@
 import logging
 import os
 import threading
+import asyncio
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ChatJoinRequestHandler, ContextTypes
 
-# Simple dummy web server so Render's Free Tier stays active
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+# Simple HTTP health check server for Render Free Tier
+class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Bot is alive!")
+        self.wfile.write(b"OK")
 
-def run_dummy_server():
+def start_health_server():
     port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
     server.serve_forever()
 
 TOKEN = os.environ.get("BOT_TOKEN")
@@ -27,7 +28,7 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
     chat = request.chat
 
     try:
-        # 1. Automatically approve the join request
+        # 1. Automatically approve join request
         await context.bot.approve_chat_join_request(
             chat_id=chat.id,
             user_id=user.id
@@ -65,10 +66,13 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
         print(f"Error handling request: {e}")
 
 if name == '__main__':
-    # Start web server in background thread for Render health check
-    threading.Thread(target=run_dummy_server, daemon=True).start()
+    # Start web server thread
+    health_thread = threading.Thread(target=start_health_server, daemon=True)
+    health_thread.start()
 
+    # Build Telegram Bot
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(ChatJoinRequestHandler(auto_approve_and_welcome))
+    
     print("Bot is starting...")
-    app.run_polling()
+    app.run_polling(stop_signals=None)
