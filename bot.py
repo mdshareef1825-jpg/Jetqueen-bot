@@ -75,7 +75,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print(f"Error handling start command: {e}")
 
-if name == '__main__':
+if __name__ == '__main__':
     threading.Thread(target=run_web_server, daemon=True).start()
 
     if not TOKEN:
