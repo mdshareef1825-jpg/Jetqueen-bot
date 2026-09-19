@@ -62,7 +62,7 @@ async def auto_approve_and_welcome(update: Update, context: ContextTypes.DEFAULT
     except Exception as e:
         print(f"Error handling request: {e}")
 
-if name == '__main__':
+if __name__ == '__main__':
     # Start background web server thread
     threading.Thread(target=run_web_server, daemon=True).start()
 
