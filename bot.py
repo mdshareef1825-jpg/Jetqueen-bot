@@ -1,15 +1,38 @@
-import os
-from pyrogram import Client
+from pyrogram import Client, filters
+from pyrogram.types import ChatJoinRequest
 
-# Render ke environment variables se session string uthayega
-SESSION_STRING = os.environ.get("SESSION")
+# Apni credentials yahan enter karein
+API_ID = 31545473  # Apni API ID yahan dalein
+API_HASH = "20e6f4ba06ca479f23a8b8b606888bc5"  # Apna API Hash yahan dalein
+SESSION_STRING = "BQHhWIEApyEut3QSUgybCvDehu-5UbMAXN2PkptDiVgeW_eRM0DYvHClkLb5Mf8mGvXieK4KevG5gn2_MDngl4sBD0Q-ZpEZUyUo7T_qU1kyg22eYfT7dwRdj1pNTPR9c8ZxMMtdCouVCGXjBrVN9JY_5G7tJU-sr0rSO5D8tEhC78Rql1ktvt6kcR2rQaR0f-7lsqhBtRgWu2ePq4BXWc2TVVLEQCdC1SIsj_UyPFbWIkQwq03oMPSMgZQPmnVVz5PMchAj0_GQ5NOF3hGH9QvN9hqYmGEyLWVI3Xos0X7kvTLMYVLHQKSNbiZ3OiTPSWxOwCk0VrSG9Veqv0C2U4ztr5PSqwAAAAITrWxxAA"  # Apni Session String yahan dalein
 
-# Client initialize karein
+# Userbot initialization (Personal account ke liye)
 app = Client(
-    "silpa_bot",
+    "my_userbot",
+    api_id=API_ID,
+    api_hash=API_HASH,
     session_string=SESSION_STRING
 )
 
-# Pyrogram ka built-in .run() method sabse safe hai aur event loop khud sambhal leta hai
+@app.on_chat_join_request()
+async def accept_join_request(client, request: ChatJoinRequest):
+    """Group join requests ko automatically accept karega"""
+    try:
+        await client.approve_chat_join_request(request.chat.id, request.from_user.id)
+        print(f"Join request accepted for: {request.from_user.first_name}")
+    except Exception as e:
+        print(f"Error accepting request: {e}")
+
+@app.on_message(filters.private & ~filters.me)
+async def welcome_message(client, message):
+    """Personal chat mein aane wale messages par welcome message bheja jayega"""
+    try:
+        welcome_text = "Hi! Welcome. Silpa this side, further conversation hum yahan continue kar sakte hain."
+        await client.send_message(message.chat.id, welcome_text)
+        print(f"Sent welcome message to {message.from_user.first_name}")
+    except Exception as e:
+        print(f"Error sending message: {e}")
+
 if name == "__main__":
+    print("Userbot is starting...")
     app.run()
