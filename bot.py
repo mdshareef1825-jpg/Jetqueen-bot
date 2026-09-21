@@ -28,7 +28,7 @@ async def welcome_message(client, message):
         await client.send_message(message.chat.id, welcome_text)
         print(f"Sent welcome message to {message.from_user.first_name}")
     except Exception as e:
-        print(f5f"Error sending message: {e}")
+        print(f"Error sending message: {e}")
 
 if name == "__main__":
     print("Userbot is starting with Docker Python 3.11...")
