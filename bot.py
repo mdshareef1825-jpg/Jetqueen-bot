@@ -64,6 +64,6 @@ async def direct_join_welcome(client, message: Message):
     except Exception as e:
         print(f"Error in direct join handler: {e}")
 
-if name == "__main__":
+if __name__ == "__main__":
     print("Userbot is starting with precise welcome & join handlers...")
     app.run()
