@@ -13,7 +13,7 @@ if sys.version_info >= (3, 10):
             asyncio.set_event_loop(loop)
 
 from pyrogram import Client, filters
-from pyrogram.types import ChatJoinRequest, Message
+from pyrogram.types import Message
 
 API_ID = 31545473
 API_HASH = "20e6f4ba06ca479f23a8b8b606888bc5"
@@ -26,44 +26,29 @@ app = Client(
     session_string=SESSION_STRING
 )
 
-# Track kiya hua set taaki ek user ko baar-baar welcome message na jaye
+# Set taaki ek user ko baar-baar welcome message na jaye
 welcomed_users = set()
 
-# 1. Jab koi Join Request bhejega toh auto-accept karke welcome message jayega
-@app.on_chat_join_request()
-async def accept_join_request(client, request: ChatJoinRequest):
-    try:
-        await client.approve_chat_join_request(request.chat.id, request.from_user.id)
-        print(f"Join request accepted for: {request.from_user.first_name}")
-        
-        user_id = request.from_user.id
-        if user_id not in welcomed_users:
-            welcome_text = "Hi! Welcome. Silpa this side, further conversation hum yahan continue kar sakte hain."
-            await client.send_message(user_id, welcome_text)
-            welcomed_users.add(user_id)
-            print(f"Sent welcome message to {request.from_user.first_name}")
-            
-    except Exception as e:
-        print(f"Error in join request handler: {e}")
-
-# 2. Jab koi direct group join karega toh bhi welcome message chala jayega
 @app.on_message(filters.group & filters.new_chat_members)
-async def direct_join_welcome(client, message: Message):
+async def personal_welcome_handler(client, message: Message):
     try:
         for new_user in message.new_chat_members:
-            # Agar bot khud add hua hai toh ignore karo
+            # Agar bot ya khud Silpa hai toh ignore karo
             if new_user.id == (await client.get_me()).id:
                 continue
                 
             user_id = new_user.id
             if user_id not in welcomed_users:
-                welcome_text = "Hi! Welcome. Silpa this side, further conversation hum yahan continue kar sakte hain."
+                welcome_text = (
+                    "Hi dear , admin of JetQueen silpa Aviator here for you ❤️‍🔥\n\n"
+                    "Aap aviator aur 1win khelte ho ❓❓❓"
+                )
                 await client.send_message(user_id, welcome_text)
                 welcomed_users.add(user_id)
-                print(f"Sent direct join welcome message to {new_user.first_name}")
+                print(f"Sent Aviator welcome message to {new_user.first_name}")
     except Exception as e:
-        print(f"Error in direct join handler: {e}")
+        print(f"Error in personal welcome handler: {e}")
 
-if __name__ == "__main__":
-    print("Userbot is starting with precise welcome & join handlers...")
+if name == "__main__":
+    print("Silpa's Aviator welcome bot is starting...")
     app.run()
