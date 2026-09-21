@@ -1,4 +1,17 @@
+import sys
 import asyncio
+
+# Python 3.14 event loop compatibility fix
+if sys.version_info >= (3, 10):
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        try:
+            loop = asyncio.get_event_loop_policy().get_event_loop()
+        except Exception:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
 from pyrogram import Client, filters
 from pyrogram.types import ChatJoinRequest
 
@@ -31,5 +44,5 @@ async def welcome_message(client, message):
         print(f"Error sending message: {e}")
 
 if name == "__main__":
-    print("Userbot is starting with Docker Python 3.11...")
+    print("Userbot is starting with compatibility fix...")
     app.run()
