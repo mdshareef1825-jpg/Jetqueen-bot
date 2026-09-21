@@ -49,6 +49,6 @@ async def personal_welcome_handler(client, message: Message):
     except Exception as e:
         print(f"Error in personal welcome handler: {e}")
 
-if name == "__main__":
+if __name__ == "__main__":
     print("Silpa's Aviator welcome bot is starting...")
     app.run()
