@@ -43,6 +43,6 @@ async def welcome_message(client, message):
     except Exception as e:
         print(f"Error sending message: {e}")
 
-if name == "__main__":
+if __name__ == "__main__":
     print("Userbot is starting with compatibility fix...")
     app.run()
